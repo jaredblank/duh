@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Equity Real Estate – Voice Clone Submission</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Equity Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Manrope:600,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Heebo:400,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --eq-blue: #0054A0;
+            --eq-blue-dark: #003f77;
+            --eq-gray: #f4f6fa;
+            --eq-accent: #00b6f0;
+            --eq-border: #dde6ee;
+        }
+        html, body {
+            background: var(--eq-gray);
+            margin: 0;
+            padding: 0;
+            font-family: 'Heebo', Arial, sans-serif;
+        }
+        .header {
+            text-align: center;
+            background: white;
+            padding: 28px 0 16px 0;
+            border-bottom: 2px solid var(--eq-blue);
+        }
+        .logo {
+            width: 160px;
+            margin-bottom: 5px;
+        }
+        h1 {
+            color: var(--eq-blue);
+            font-family: 'Manrope', Arial, sans-serif;
+            font-weight: 800;
+            margin: 7px 0 5px 0;
+            font-size: 2em;
+            letter-spacing: 0.02em;
+        }
+        h2 {
+            color: var(--eq-blue-dark);
+            font-family: 'Manrope', Arial, sans-serif;
+            font-weight: 600;
+            font-size: 1.13em;
+            margin-bottom: 9px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px #0001;
+            padding: 24px 20px;
+            margin: 24px auto 18px auto;
+            max-width: 460px;
+        }
+        label {
+            font-family: 'Manrope', Arial, sans-serif;
+            font-weight: 600;
+        }
+        button, input[type="file"] {
+            margin: 10px 0;
+            font-family: 'Heebo', Arial, sans-serif;
+        }
+        button {
+            background: var(--eq-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 20px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        button:focus, input[type="file"]:focus {
+    outline: 2px solid var(--eq-blue);
+    outline-offset: 2px;
+}
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #audioPreview { margin-top: 15px; width: 100%; }
+        #status { color: var(--eq-blue-dark); margin-top: 10px; font-weight: 600; }
+        #error { color: #d32f2f; margin-top: 10px; font-weight: 600; }
+        .instructions {
+            font-size: 1em;
+            line-height: 1.65;
+            color: #27344a;
+        }
+        ol, ul { margin: 0 0 10px 23px; }
+        .note {
+            font-family: 'Open Sans', Arial, sans-serif;
+            font-size: .96em;
+            color: #8b9099;
+            margin-top: 8px;
+        }
+        .upload-area { margin-top: 10px; }
+        @media (max-width: 600px) {
+            .card { padding: 17px 4vw; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://ecloudbackup.blob.core.windows.net/logos/Equity_UT_Logo_Blue.png" class="logo" alt="Equity Real Estate Logo" style="background:white; padding:3px; border-radius:3px;">
+        <h2>Personalized Voice Clone Submission</h2>
+    </div>
+
+    <div class="card">
+        <div class="instructions">
+            <b>How to Submit Your Voice Sample:</b>
+            <ol>
+                <li>Record <b>1–2 minutes</b> of your voice (no background noise, natural tone).</li>
+                <li>Speak as you would with clients; consistent, professional, and clear.</li>
+<b>- OR -</b>
+                <li>Use <b>iPhone Voice Memos</b> or <b>Android Recorder</b>, then share the file to your device.</li>
+                <li>Upload your file below. <span class="note">(Accepted: .m4a, .mp3, .wav — we'll convert automatically if needed.)</span></li>
+            </ol>
+            <b>Quick steps:</b>
+            <ul>
+                <li><b>iPhone:</b> Voice Memos → Record → Tap ... → Share → Save to Files or Email to Yourself.</li>
+                <li><b>Android:</b> Recorder App → Record → Share → Save to Drive or Email to Yourself.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="card upload-area">
+    <label>1. Record Here (optional): Record 1–2 minutes of your voice  <span style="font-weight:400; color:#555;">begins 5 seconds after clicking start:</span></label><br>
+    <button id="recordBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+    <audio id="audioPreview" controls style="width:100%; display:none"></audio>
+    <div id="afterRecording" style="display:none; color:#007900; font-weight:600; margin-top:6px;">Recording ready. Review above and click <span id="submitLabel">Submit Voice Sample</span>.</div>
+    <div style="font-size:0.97em; color:#888; margin-top:5px;">
+  Review your recording above, then click <b>Submit Voice Sample</b> to send.
+</div>
+
+    <br>
+    <label>2. Or Upload a File:</label><br>
+    <input type="file" id="audioUpload" accept=".mp3,.wav,.m4a,audio/*">
+    
+    <button id="submitBtn" disabled>Submit Voice Sample</button>
+    <div id="status"></div>
+    <div id="error"></div>
+</div>
+
+<script>
+    let mediaRecorder, audioChunks = [];
+    const recordBtn = document.getElementById('recordBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const audioPreview = document.getElementById('audioPreview');
+    const submitBtn = document.getElementById('submitBtn');
+    const afterRecording = document.getElementById('afterRecording');
+    const submitLabel = document.getElementById('submitLabel');
+    let recordedBlob = null;
+
+    // Enable submit if a file is selected or a recording exists
+    function updateSubmitState() {
+        let fileSelected = document.getElementById('audioUpload').files.length > 0;
+        submitBtn.disabled = !(fileSelected || recordedBlob);
+        if (recordedBlob) {
+            submitLabel.textContent = "Submit This Recording";
+        } else if (fileSelected) {
+            submitLabel.textContent = "Submit This File";
+        } else {
+            submitLabel.textContent = "Submit Voice Sample";
+        }
+    }
+
+    document.getElementById('audioUpload').addEventListener('change', function() {
+        recordedBlob = null;
+        audioPreview.style.display = 'none';
+        afterRecording.style.display = 'none';
+        updateSubmitState();
+    });
+
+    recordBtn.onclick = async () => {
+        document.getElementById('status').textContent = '';
+        document.getElementById('error').textContent = '';
+        audioChunks = [];
+        recordedBlob = null;
+        audioPreview.style.display = 'none';
+        afterRecording.style.display = 'none';
+        updateSubmitState();
+
+        try {
+        let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        // ---- REPLACE THIS WHOLE BLOCK ----
+        recordBtn.disabled = true;
+        submitBtn.disabled = true;
+        recordBtn.textContent = "Recording in 5...";
+        setTimeout(() => { recordBtn.textContent = "Recording in 4..."; }, 1000);
+        setTimeout(() => { recordBtn.textContent = "Recording in 3..."; }, 2000);
+        setTimeout(() => { recordBtn.textContent = "Recording in 2..."; }, 3000);
+        setTimeout(() => { recordBtn.textContent = "Recording in 1..."; }, 4000);
+        setTimeout(() => {
+            mediaRecorder.start();
+            recordBtn.textContent = "Recording...";
+            stopBtn.disabled = false;
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioPreview.src = URL.createObjectURL(recordedBlob);
+                audioPreview.style.display = 'block';
+                afterRecording.style.display = 'block';
+                updateSubmitState();
+                recordBtn.textContent = "Start Recording";
+            };
+        }, 5000);
+        } catch {
+            document.getElementById('error').textContent = "Microphone permission denied or not available.";
+            recordBtn.textContent = "Start Recording";
+            recordBtn.disabled = false;
+        }
+    };
+    stopBtn.onclick = () => {
+        mediaRecorder.stop();
+        recordBtn.disabled = false;
+        stopBtn.disabled = true;
+    };
+
+    // --- Submission Logic ---
+    submitBtn.onclick = async () => {
+        document.getElementById('status').textContent = '';
+        document.getElementById('error').textContent = '';
+        let fileInput = document.getElementById('audioUpload');
+        let formData = new FormData();
+        let file = fileInput.files[0];
+
+        if (file) {
+            formData.append("audio", file);
+        } else if (recordedBlob) {
+            formData.append("audio", recordedBlob, "voice_sample.webm");
+        } else {
+            document.getElementById('error').textContent = "Please record or upload a voice sample first.";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        try {
+            const resp = await fetch('https://agent-system-app.whitewater-280936c0.westus2.azurecontainerapps.io/submit-voice', {
+                method: 'POST',
+                body: formData
+            });
+            if (resp.ok) {
+                document.getElementById('status').textContent = "Voice sample submitted successfully!";
+            } else {
+                document.getElementById('error').textContent = "Upload failed. Please try again.";
+            }
+        } catch (e) {
+            document.getElementById('error').textContent = "Error: " + e;
+        }
+        submitBtn.disabled = false;
+    };
+
+    updateSubmitState();
+</script>
+
+</body>
+</html>
